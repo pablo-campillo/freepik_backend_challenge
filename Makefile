@@ -28,7 +28,7 @@ rm_container:
 	docker rm image_captions
 
 benchmark: out tests/data/cats.jpg
-	for c in {1,4,16}; do \
+	for c in {1,8,16}; do \
 		ab -n 32 -c $${c} \
 			-g out/requests_$${c}.dat \
 			-p tests/data/cats.jpg \
@@ -39,10 +39,19 @@ benchmark: out tests/data/cats.jpg
 		mv response_time.png "out/response_time_c$${c}.png"; \
 	done
 
-baseline: out data/nyc_taxi.ndjson
-	for c in {1,4,16}; do \
+baseline: out tests/data/cats.jpg
+	for c in {1,8,16}; do \
 		ab -n 32 -c $${c} \
 			-g out/requests_baseline_$${c}.dat \
 			-p tests/data/cats.jpg \
 			"http://0.0.0.0:8888/"; \
+	done
+
+
+images: out tests/data/cats.jpg
+	for c in {1,4,16}; do \
+		cp out/requests_baseline_$${c}.dat out/requests_baseline.dat; \
+		cp out/requests_$${c}.dat out/requests.dat; \
+		gnuplot plot_response_time.p; \
+		mv response_time.png "out/response_time_c$${c}.png"; \
 	done
