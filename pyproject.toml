@@ -9,7 +9,20 @@ packages = [{include = "image_captions", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+transformers = "^4.35.2"
+pillow = "^10.1.0"
+tornado = "^6.3.3"
+torch = {version = "^2.1.1+cu118", source = "pytorch-gpu-src"}
 
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+
+
+[[tool.poetry.source]]
+name = "pytorch-gpu-src"
+url = "https://download.pytorch.org/whl/cu118"
+priority = "explicit"
 
 [build-system]
 requires = ["poetry-core"]
