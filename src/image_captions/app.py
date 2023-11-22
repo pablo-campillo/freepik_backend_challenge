@@ -27,12 +27,6 @@ model = AutoModelForCausalLM.from_pretrained(root_dir / "git-base-textcaps", loc
 
 # @tornado.web.stream_request_body
 class ImageReceiverHandler(tornado.web.RequestHandler):
-    def initialize(self):
-        print(f"initialize")
-
-    async def data_received(self, chunk):
-        print(f"data_received {len(chunk)}")
-
     async def post(self):
         image = Image.open(io.BytesIO(self.request.body))
 
