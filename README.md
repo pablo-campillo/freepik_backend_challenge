@@ -215,3 +215,23 @@ $ make batch_performance
 As we can see in the plot, the batch execution scales better than sequential one:
 
 ![Benchmark Screenshot](docs/i2/batch_times.png)
+
+# GPU Batch Service
+
+A thread has been created that receives requests from a queue.
+It accumulates the requests and response queues
+while it receives requests within 1 millisecond.
+When the timeout exception is raised or it has reached the maximum batch size (64),
+it computes all the requests and returns the response to the corresponding queue.
+
+## Results
+
+To check the performance improvement the concurrence
+and the number of request have been increased to 64 and 256, respectively.
+Baseline has been rerun using the file `src/image_captions/baseline_app.py`.
+
+As we can see, time response using batching is 50% faster than sequential one:
+
+*Response time (c=64)*
+
+![Benchmark Screenshot](docs/i3/response_time_c64.png)
