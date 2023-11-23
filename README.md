@@ -115,7 +115,7 @@ flowchart LR
 As we can see, the most heavy task is the inference one being 200 times slower
 than the second slowest (encoder):
 * **encoder:** 0.01
-* **inference:** 1.93
+* **inference:** 1.93 (CPU), 0.625 (GPU)
 * **decoder:** 0.0002
 
 ## Assumptions
@@ -198,3 +198,20 @@ So, I tested a version using the GPU. The performance is much better! :-)
 
 Hereinafter, the GPU enabled version will be used as baseline.
 
+## GPU Batch performance
+
+Just to know how the performance works with the number of batches.
+
+From 1 to 128, in steps of 16. At 128 the GPU is out of memory.
+So, the test has been carry out up to 64.
+
+The script for the test is in scripts/batch_performance.py. It
+can be run using Makefile:
+
+```bash
+$ make batch_performance
+```
+
+As we can see in the plot, the batch execution scales better than sequential one:
+
+![Benchmark Screenshot](docs/i2/batch_times.png)
