@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import torch
 import tornado.web
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
@@ -22,7 +23,8 @@ tornado.process.fork_processes(1)
 
 root_dir = Path(__file__).parent.parent.parent
 processor = AutoProcessor.from_pretrained(root_dir / "git-base-textcaps", local_files_only=True)
-model = AutoModelForCausalLM.from_pretrained(root_dir / "git-base-textcaps", local_files_only=True)
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+model = AutoModelForCausalLM.from_pretrained(root_dir / "git-base-textcaps", local_files_only=True).to(device)
 
 
 # @tornado.web.stream_request_body
@@ -30,7 +32,7 @@ class ImageReceiverHandler(tornado.web.RequestHandler):
     async def post(self):
         image = Image.open(io.BytesIO(self.request.body))
 
-        pixel_values = processor(images=image, return_tensors="pt").pixel_values
+        pixel_values = processor(images=image, return_tensors="pt").to(device).pixel_values
 
         generated_ids = model.generate(pixel_values=pixel_values, max_length=50)
         generated_caption = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]

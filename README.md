@@ -12,6 +12,37 @@ The service can be exposed using **http** or **grpc**.
 
 # Requirements
 
+## Support CUDA from Docker
+
+Source: https://saturncloud.io/blog/how-to-install-pytorch-on-the-gpu-with-docker/
+
+Setup the package repository and the GPG key:
+
+```bash
+$ distribution=$(. /etc/os-release;echo  $ID$VERSION_ID)  
+$ curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -  
+$ curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+```
+
+Install the nvidia-container-toolkit package (and dependencies) after updating the package listing:
+
+```bash
+$ sudo apt-get update
+$ sudo apt-get install -y nvidia-container-toolkit
+```
+
+Now, configure the Docker daemon to recognize the NVIDIA Container Runtime:
+
+```bash
+$ sudo nvidia-ctk runtime configure --runtime=docker
+```
+
+Restart the Docker daemon to complete the installation after setting the default runtime:
+
+```bash
+$ sudo systemctl restart docker
+```
+
 ## git lfs
 Install [git lfs](https://packagecloud.io/github/git-lfs/install) to clone the model repository.
 It is required to clone the repository and download the model so that you don't have to download it every time.
@@ -19,36 +50,36 @@ It is required to clone the repository and download the model so that you don't 
 ### Ubuntu
 
 ```bash
-curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-sudo apt-get install git-lfs
+$ curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+$ sudo apt-get install git-lfs
 ```
 
 Clone and download model:
 ```bash
-make clone_repo
+$ make clone_repo
 ```
 
 Clone the repository with the model
 ```bash
-make clone_repo
+$ make clone_repo
 ```
 
 # Usage
 
 1. Build the docker:
 ```bash
-make build
+$ make build
 ```
 
 2. In one terminal run the server:
 
 ```bash
-make run_docker
+$ make run_docker
 ```
 
 3. In other terminal make a request:
 ```bash
-make test_server
+$ make test_server
 ```
 
 The output should be something like this:
@@ -134,6 +165,7 @@ one by one.
 
 # GPU performance
 
+## Optimizations
 First I will try to optimize GPU inference.
 I followed these recommendations: https://huggingface.co/docs/transformers/main/perf_infer_gpu_one
 However, none of the optimizations are suitable for this custom model:
@@ -145,4 +177,24 @@ it is a custom or unsupported architecture for
 the task text-generation-with-past,
 but no custom onnx configuration was passed as `custom_onnx_configs`.
 It is too complex for the challenge trying to figure out how the configuration should be. 
+
+## GPU enabled in Docker
+
+Hopefully, making debugging I realised that the model was not using the GPU!
+
+So, I tested a version using the GPU. The performance is much better! :-)
+
+*Response time (c=1)*
+
+![Benchmark Screenshot](docs/i1/response_time_c1.png)
+
+*Response time (c=8)*
+
+![Benchmark Screenshot](docs/i1/response_time_c8.png)
+
+*Response time (c=16)*
+
+![Benchmark Screenshot](docs/i1/response_time_c16.png)
+
+Hereinafter, the GPU enabled version will be used as baseline.
 

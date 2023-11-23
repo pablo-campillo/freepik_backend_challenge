@@ -10,7 +10,7 @@ out:
 	mkdir out
 
 run_local:
-	python src/image_captions/app.py
+	poetry run python src/image_captions/app.py
 
 test_server:
 	curl -w '\ntotal request time=%{time_total}\n' --data-binary @tests/data/cats.jpg http://0.0.0.0:8888
@@ -19,7 +19,7 @@ build_docker:
 	docker build -t freepik/image_captions .
 
 run_docker:
-	docker run -p 8888:8888 --name image_captions freepik/image_captions
+	docker run -p 8888:8888 --name image_captions --gpus all freepik/image_captions
 
 stop_container:
 	docker stop image_captions
@@ -49,7 +49,7 @@ baseline: out tests/data/cats.jpg
 
 
 images: out tests/data/cats.jpg
-	for c in {1,4,16}; do \
+	for c in {1,8,16}; do \
 		cp out/requests_baseline_$${c}.dat out/requests_baseline.dat; \
 		cp out/requests_$${c}.dat out/requests.dat; \
 		gnuplot plot_response_time.p; \
