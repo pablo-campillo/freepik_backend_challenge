@@ -13,7 +13,7 @@ set size 1,1
 # y-axis grid
 set grid y
 
-set yrange [0:5000]
+set yrange [0:20000]
 
 #x-axis label
 set xlabel "requests"
