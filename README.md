@@ -132,3 +132,17 @@ Each plot shows the time response of the 32 requests sorted by time response.
 We can see how the service scale very bad because each requests is processed
 one by one.
 
+# GPU performance
+
+First I will try to optimize GPU inference.
+I followed these recommendations: https://huggingface.co/docs/transformers/main/perf_infer_gpu_one
+However, none of the optimizations are suitable for this custom model:
+
+* Flash Attention 2.0: The current architecture does not support Flash Attention 2.0.
+* FlashAttention: The model type git is not yet supported to be used with BetterTransformer.
+* Optimum with ONNX Runtime: Problems trying to export the model,
+it is a custom or unsupported architecture for
+the task text-generation-with-past,
+but no custom onnx configuration was passed as `custom_onnx_configs`.
+It is too complex for the challenge trying to figure out how the configuration should be. 
+
