@@ -55,3 +55,6 @@ images: out tests/data/cats.jpg
 		gnuplot plot_response_time.p; \
 		mv response_time.png "out/response_time_c$${c}.png"; \
 	done
+
+batch_performance:
+	poetry run python scripts/batch_performance.py
