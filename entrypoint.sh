@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python src/image_captions/app.py
+PYTHONPATH=src python src/image_captions/best/app.py

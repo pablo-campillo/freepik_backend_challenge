@@ -1,8 +1,6 @@
 import asyncio
-import io
 
 import tornado
-from PIL import Image
 
 
 class InferenceReceiverHandler(tornado.web.RequestHandler):

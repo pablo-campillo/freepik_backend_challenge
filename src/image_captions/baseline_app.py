@@ -1,18 +1,14 @@
+import asyncio
+import io
+import sys
 from pathlib import Path
 
 import torch
 import tornado.web
-from tornado.httpserver import HTTPServer
-from tornado.ioloop import IOLoop
-from tornado.netutil import bind_sockets
-import io
-
-import asyncio
-
-import sys
-
 from PIL import Image
-from transformers import AutoProcessor, AutoModelForCausalLM
+from tornado.httpserver import HTTPServer
+from tornado.netutil import bind_sockets
+from transformers import AutoModelForCausalLM, AutoProcessor
 
 PORT = 8888
 ADDR = '0.0.0.0'

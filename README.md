@@ -19,6 +19,7 @@
   * [Results](#results-1)
 * [Multi CPU](#multi-cpu)
 * [Conclusion](#conclusion)
+  * [TODO](#todo)
 <!-- TOC -->
 
 # Freepik Python Backend Challenge
@@ -110,6 +111,17 @@ The output should be something like this:
 two cats sleeping on a couch with remotes on them.
 total request time=1.763398
 ```
+
+4. Optionally, you can run benchmark running it in other terminal:
+```bash
+make benchmark
+```
+
+You can check code quality running (isort, flake8):
+```bash
+$ make qa
+```
+Length of lines up to 120 characters are allowed, see `.flake8` file.
 
 # Solution Design
 
@@ -381,3 +393,8 @@ The approach [Multi CPU and GPU Batch](#multi-cpu-and-gpu-batch)
 was promissing but the overhead of HTTP request and serialization and
 deserialization of the encoders is bigger than the benefit of using
 multiple CPUs for encoding the image.
+
+## TODO
+* Add more tests and check exceptions (e.g. body request empty)
+* API test fail because of asyncio loop and inference thread
+* Add observability

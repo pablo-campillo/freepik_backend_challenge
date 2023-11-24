@@ -3,6 +3,9 @@ SHELL := /bin/bash
 clone_repo:
 	git clone https://huggingface.co/microsoft/git-base-textcaps && cd git-base-textcaps && git lfs pull
 
+qa:
+	isort src/ tests/ && flake8 src/ tests/
+
 clean:
 	rm -rf out/
 
@@ -10,7 +13,7 @@ out:
 	mkdir out
 
 run_local:
-	poetry run python src/image_captions/app.py
+	PYTHONPATH=src python src/image_captions/best/app.py
 
 test_server:
 	curl -w '\ntotal request time=%{time_total}\n' --data-binary @tests/data/cats.jpg http://0.0.0.0:8888
@@ -57,4 +60,4 @@ images: out tests/data/cats.jpg
 	done
 
 batch_performance:
-	poetry run python scripts/batch_performance.py
+	PYTHONPATH=src python scripts/batch_performance.py
