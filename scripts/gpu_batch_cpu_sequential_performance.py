@@ -14,10 +14,8 @@ def performance_encoder_batch():
     """
     root_dir = Path(__file__).parent.parent
     processor = AutoProcessor.from_pretrained(root_dir / "git-base-textcaps", local_files_only=True)
-    model = AutoModelForCausalLM.from_pretrained(root_dir / "git-base-textcaps", local_files_only=True)
 
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    model = model.to(device)
 
     file_name = "tests/data/cats.jpg"
     image = Image.open(Path(__file__).parent.parent / file_name)
