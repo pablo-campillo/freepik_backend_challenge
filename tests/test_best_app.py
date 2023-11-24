@@ -6,8 +6,8 @@ import tornado
 from PIL import Image
 from tornado.ioloop import IOLoop
 
-from image_captions.inference.handler import InferenceReceiverHandler
-from image_captions.inference.inference import server_loop
+from image_captions.best.handler import ImageReceiverHandler
+from image_captions.best.inference import server_loop
 
 
 @pytest.fixture(scope='module')
@@ -18,7 +18,7 @@ def model_queue():
 @pytest.fixture
 def app(model_queue):
     handlers = [
-        (r"/", InferenceReceiverHandler, dict(model_queue=model_queue)),
+        (r"/", ImageReceiverHandler, dict(model_queue=model_queue)),
     ]
     settings = {
         'debug': False
@@ -26,15 +26,12 @@ def app(model_queue):
     return tornado.web.Application(handlers, **settings)
 
 
-async def test_inference_api(http_server_client, processor, model_queue):
+async def test_best_app(http_server_client, processor, model_queue):
     IOLoop.current().spawn_callback(server_loop, model_queue)
     file_name = "tests/data/cats.jpg"
-    image = Image.open(Path(__file__).parent.parent.parent / file_name)
+    image = Image.open(Path(__file__).parent.parent / file_name)
 
-    pixel_values = processor(images=image, return_tensors="np").pixel_values
-    serialized = pixel_values.tobytes()
-
-    response = await http_server_client.fetch("/", method='POST', body=serialized)
+    response = await http_server_client.fetch("/", method='POST', body=image.tobytes())
     assert response.code == 200
     words = response.body.split(' ')
     for we in ["two", "cats", "sleeping", "couch"]:

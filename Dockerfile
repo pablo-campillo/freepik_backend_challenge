@@ -10,6 +10,7 @@ COPY src ./src
 COPY poetry.lock ./poetry.lock
 COPY pyproject.toml ./pyproject.toml
 COPY README.md ./README.md
+COPY .env ./.env
 ADD git-base-textcaps ./git-base-textcaps
 
 COPY entrypoint.sh /entrypoint.sh

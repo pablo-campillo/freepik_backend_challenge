@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from transformers import AutoProcessor, AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoProcessor
 
 root_dir = Path(__file__).parent.parent
 

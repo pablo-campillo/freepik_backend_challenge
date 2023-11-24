@@ -1,17 +1,14 @@
 
+import asyncio
+import io
+import sys
 from pathlib import Path
 
 import tornado.web
+from PIL import Image
 from tornado import httpclient
 from tornado.httpserver import HTTPServer
 from tornado.netutil import bind_sockets
-import io
-
-import asyncio
-
-import sys
-
-from PIL import Image
 from transformers import AutoProcessor
 
 PORT = 8888
@@ -23,10 +20,6 @@ tornado.process.fork_processes(tornado.process.cpu_count() - 1)
 
 root_dir = Path(__file__).parent.parent.parent
 processor = AutoProcessor.from_pretrained(root_dir / "git-base-textcaps", local_files_only=True)
-
-
-def encode_image(file_path):
-    image = Image.open(file_path)
 
 
 async def get_captions(image_bytes):
