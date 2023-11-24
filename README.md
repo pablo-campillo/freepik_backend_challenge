@@ -235,3 +235,101 @@ As we can see, time response using batching is 50% faster than sequential one:
 *Response time (c=64)*
 
 ![Benchmark Screenshot](docs/i3/response_time_c64.png)
+
+It takes 10 seconds in inferring 64 images, it is 0.156 seconds per image.
+
+# Multi CPU and GPU Batch
+
+Another option is to create two types of services, one public and other private.
+The public one launches one server per core but left one free for the private service. 
+So, there are 15 processes running the public server and one the private one.
+Tornado balances the requests among the 15 public services.
+The public server receives the images and sent them to the private server asynchronously.
+
+Because encoder takes some time (0.01 seconds),
+it can be run in each server so that the private service receives the encoded
+image, that is, a multidimensional array (1, 3, 224, 224).
+Decoder task is really fast, so it can be achieved in the CPU
+and only the encoded data are sent to the inference service.
+The private service works like the previous version,
+asynchronously and inferring in batch received from a queue.
+
+Bellow, you can see a diagram of the tasks, each colour is executed in
+a different proces (CPU).
+A single process can send several requests to the inference services
+as it did in the previous version.
+
+```mermaid
+flowchart LR
+    s0((Image)) -- "bytes" --> s01["encoder"] --> si1["inference"] 
+    s1((Image)) -- "bytes" --> s11["encoder"] --> si1["inference"] 
+    s2((Image)) -- "bytes" --> s21["encoder"] --> si1["inference"]
+    si1["inference"] --> si2["decoder"]
+    si2["decoder"] --> s03((Caption))
+    si2["decoder"] --> s13((Caption))
+    si2["decoder"] --> s23((Caption))
+    
+    style s0 fill:#fff,color:#000
+    style s01 fill:#fff,color:#000
+    style s03 fill:#fff,color:#000
+    style s1 fill:#f0f,color:#000
+    style s11 fill:#f0f,color:#000
+    style s13 fill:#f0f,color:#000
+    style s2 fill:#ff0,color:#000
+    style s21 fill:#ff0,color:#000
+    style s23 fill:#ff0,color:#000
+    style si1 fill:#f00,color:#000
+    style si2 fill:#f00,color:#000
+```
+
+Below, you can see a sequence diagram with just two public services.
+Note that, they can process several request before receiving a response
+because they are asynchronous, but it is not reflected in the diagram.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client    
+    participant Public01    
+    participant Public02    
+    participant Private    
+    Client->>Public01: POST image
+    activate Public01
+    Public01->>Public01: Encoder
+    activate Private
+    Public01->>Private: POST encoded image
+    Private->>Private: add queue
+    Client->>Public02: POST image
+    Public02->>Public02: Encoder
+    activate Public02
+    Public02->>Private: POST encoded image
+    Private->>Private: add queue
+    Private->>Private: batch inference
+    Private->>Private: batch decode
+    Private->>Public01: captions
+    Private->>Public02: captions
+    deactivate Public02
+    deactivate Public01
+    deactivate Private
+```
+
+The idea is to increase the performance due to encoder task is achieved by the CPU.
+
+## Results
+
+Below, we can see that time responses for concurrency equal to 64.
+Unfortunately, the performance is worse than the previous version
+with one service.
+
+*Response time (c=64)*
+
+![Benchmark Screenshot](docs/i4/response_time_c64.png)
+
+Is it much slower encoding images one by one in the CPU than in batches
+in the GPU? The comparison generated with 
+`scripts/gpu_batch_cpu_sequential_performance.py` shows
+that the performance difference is small:
+
+![Benchmark Screenshot](docs/i4/batch_times.png)
+
+So, the overhead in redirecting the calls to the private service is too high.
