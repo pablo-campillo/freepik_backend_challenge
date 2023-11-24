@@ -1,3 +1,26 @@
+<!-- TOC -->
+* [Freepik Python Backend Challenge](#freepik-python-backend-challenge)
+  * [Service Requirements](#service-requirements)
+* [Requirements](#requirements)
+  * [Support CUDA from Docker](#support-cuda-from-docker)
+  * [git lfs](#git-lfs)
+    * [Ubuntu](#ubuntu)
+* [Usage](#usage)
+* [Solution Design](#solution-design)
+  * [Assumptions](#assumptions)
+  * [Benchmarks](#benchmarks)
+* [GPU performance](#gpu-performance)
+  * [Optimizations](#optimizations)
+  * [GPU enabled in Docker](#gpu-enabled-in-docker)
+  * [GPU Batch performance](#gpu-batch-performance)
+* [GPU Batch Service](#gpu-batch-service)
+  * [Results](#results)
+* [Multi CPU and GPU Batch](#multi-cpu-and-gpu-batch)
+  * [Results](#results-1)
+* [Multi CPU](#multi-cpu)
+* [Conclusion](#conclusion)
+<!-- TOC -->
+
 # Freepik Python Backend Challenge
 Service that uses **GIT (short for GenerativeImage2Text) model** from [hugging face](https://huggingface.co/microsoft/git-base-textcaps) for image captioning.
 
@@ -333,3 +356,28 @@ that the performance difference is small:
 ![Benchmark Screenshot](docs/i4/batch_times.png)
 
 So, the overhead in redirecting the calls to the private service is too high.
+
+# Multi CPU
+Another option is to try making inference just with CPU.
+As we can see, GPU Batch is not a big difference.
+So, as we have 16 cores, maybe it could get a better performance.
+
+However, inferring using CPU uses many cores. 
+Before implementing the service, a performance test has been carried out.
+Using a Pool of 2 process runs more than 20 times slower than GPU using batching.
+
+![Benchmark Screenshot](docs/i5/batch_times.png)
+
+So, this approach has been discarted.
+
+# Conclusion
+
+The best approach is [GPU Batch Service](#gpu-batch-service).
+
+GPU is faster than CPU just processing an image,
+but it is much faster processing multiple images.
+
+The approach [Multi CPU and GPU Batch](#multi-cpu-and-gpu-batch)
+was promissing but the overhead of HTTP request and serialization and
+deserialization of the encoders is bigger than the benefit of using
+multiple CPUs for encoding the image.
